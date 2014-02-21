@@ -16,11 +16,7 @@ public:
     void Start();
 
     /** Stops time measuring. */
-    void Stop() {
-        m_endPoint = std::chrono::steady_clock::now();
-        if ( m_isRunningAfterUnpause ) m_startPoint += ( m_unpausePoint - m_pausePoint );
-        m_isRunning = false; m_isPaused = false; m_isRunningAfterUnpause = false;
-    }
+    void Stop();
 
     /** Pauses time measuring. */
     void Pause() {
@@ -73,6 +69,24 @@ inline void Timer::Start() {
     // Get a start point in time. It is important that we do it at the end of the method.
     // Instructions above take some time, we do not want to measure it.
     m_startPoint = std::chrono::steady_clock::now();
+}
+
+
+inline void Timer::Stop() {
+    // Get an end point in time. It is important to do this at the beginning of the method.
+    // We do not want measure instructions below.
+    m_endPoint = std::chrono::steady_clock::now();
+
+    // If the timer was paused and then unpaused,
+    // we must shift forward a start point by the idle time.
+    if ( m_isRunningAfterUnpause ) {
+        m_startPoint += ( m_unpausePoint - m_pausePoint );
+    }
+
+    // Set flags.
+    m_isRunning = false;
+    m_isPaused = false;
+    m_isRunningAfterUnpause = false;
 }
 
 
