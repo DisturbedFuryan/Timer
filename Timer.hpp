@@ -19,12 +19,7 @@ public:
     void Stop();
 
     /** Pauses time measuring. */
-    void Pause() {
-        m_tempPoint = std::chrono::steady_clock::now();
-        if ( m_isRunningAfterUnpause )
-            { m_startPoint += ( m_unpausePoint - m_pausePoint ); m_isRunningAfterUnpause = false; }
-        if ( m_isRunning && !m_isPaused ) { m_pausePoint = m_tempPoint; m_isPaused = true; }
-    }
+    void Pause();
 
     /** Unpauses time measuring. */
     void Unpause() {
@@ -87,6 +82,29 @@ inline void Timer::Stop() {
     m_isRunning = false;
     m_isPaused = false;
     m_isRunningAfterUnpause = false;
+}
+
+
+inline void Timer::Pause() {
+    m_tempPoint = std::chrono::steady_clock::now();
+
+    // Hey! We want to get a pause point in time, why we use a temporary point
+    // instead of the prepared variable m_pausePoint?!
+    // First, we need to check if the timer can be paused, but that verification costs some time.
+    // We do not want measure additional instructions,
+    // so we remember a point in time at start just in case.
+    
+    // If the timer was paused and then unpaused,
+    // we must shift forward a start point by the idle time.
+    if ( m_isRunningAfterUnpause ) {
+        m_startPoint += ( m_unpausePoint - m_pausePoint );
+        m_isRunningAfterUnpause = false;
+    }
+
+    if ( m_isRunning && !m_isPaused ) {
+        m_pausePoint = m_tempPoint;
+        m_isPaused = true;
+    }
 }
 
 
