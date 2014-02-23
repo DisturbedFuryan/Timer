@@ -22,12 +22,7 @@ public:
     void Pause();
 
     /** Unpauses time measuring. */
-    void Unpause() {
-        if ( !m_isPaused ) return;
-        m_isPaused = false;
-        m_isRunningAfterUnpause = true;
-        m_unpausePoint = std::chrono::steady_clock::now();
-    }
+    void Unpause();
 
     /* Getters. */
     bool IsRunning() const { return m_isRunning; }
@@ -105,6 +100,19 @@ inline void Timer::Pause() {
         m_pausePoint = m_tempPoint;
         m_isPaused = true;
     }
+}
+
+
+inline void Timer::Unpause() {
+    if ( !m_isPaused ) {
+        return;
+    }
+
+    // Set flags.
+    m_isPaused = false;
+    m_isRunningAfterUnpause = true;
+
+    m_unpausePoint = std::chrono::steady_clock::now();
 }
 
 
