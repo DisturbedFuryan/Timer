@@ -12,6 +12,8 @@
  */
 class Timer {
 public:
+    Timer() : m_isRunning( false ), m_isPaused( false), m_isRunningAfterUnpause( false ) {}
+
     /** Starts time measuring. */
     void Start();
 
