@@ -12,7 +12,9 @@
  */
 class Timer {
 public:
-    Timer() : m_isRunning( false ), m_isPaused( false), m_isRunningAfterUnpause( false ) {}
+    enum TimeUnit { nanoseconds, microseconds, milliseconds, seconds, minutes, hours };
+
+    Timer() : m_isRunning( false ), m_isStopped( false ) {}
 
     /** Starts time measuring. */
     void Start();
@@ -20,43 +22,42 @@ public:
     /** Stops time measuring. */
     void Stop();
 
-    /** Pauses time measuring. */
-    void Pause();
-
-    /** Unpauses time measuring. */
-    void Unpause();
+    /** Gets time in given unit (milliseconds by default).
+     *  
+     *  @param  timeUnit  desired unit of time
+     *  @return  measured time
+     */
+    unsigned long long GetTime( TimeUnit timeUnit = milliseconds );
 
     /* Getters. */
     bool IsRunning() const { return m_isRunning; }
-    bool IsPaused() const { return m_isPaused; }
+    bool IsStopped() const { return m_isStopped; }
 
 private:
     /** Start point in time. */
     std::chrono::steady_clock::time_point m_startPoint;
 
-    /** Pause point in time. */
-    std::chrono::steady_clock::time_point m_pausePoint;
-
-    /** Unpause point in time. */
-    std::chrono::steady_clock::time_point m_unpausePoint;
-
     /** End point in time. */
     std::chrono::steady_clock::time_point m_endPoint;
 
-    /** Additional point in time to preserve high precision in case of pausing. */
+    /** Additional point in time to preserve high precision. */
     std::chrono::steady_clock::time_point m_tempPoint;
 
     /* Flags keeping status. */
-    bool m_isRunning, m_isPaused, m_isRunningAfterUnpause;
+    bool m_isRunning, m_isStopped;
 };
 //==================================================================================================
 
 
 inline void Timer::Start() {
+    // We can not start timer again.
+    if ( m_isRunning ) {
+        return;
+    }
+
     // Set flags.
     m_isRunning = true;
-    m_isPaused = false;
-    m_isRunningAfterUnpause = false;
+    m_isStopped = false;
 
     // Get a start point in time. It is important that we do it at the end of the method.
     // Instructions above take some time, we do not want to measure it.
@@ -65,56 +66,49 @@ inline void Timer::Start() {
 
 
 inline void Timer::Stop() {
-    // Get an end point in time. It is important to do this at the beginning of the method.
-    // We do not want measure instructions below.
-    m_endPoint = std::chrono::steady_clock::now();
-
-    // If the timer was paused and then unpaused,
-    // we must shift forward a start point by the idle time.
-    if ( m_isRunningAfterUnpause ) {
-        m_startPoint += ( m_unpausePoint - m_pausePoint );
-    }
-
-    // Set flags.
-    m_isRunning = false;
-    m_isPaused = false;
-    m_isRunningAfterUnpause = false;
-}
-
-
-inline void Timer::Pause() {
+    // Get a point in time just in case. It is important to do it here, at start, because...
     m_tempPoint = std::chrono::steady_clock::now();
 
-    // Hey! We want to get a pause point in time, why we use a temporary point
-    // instead of the prepared variable m_pausePoint?!
-    // First, we need to check if the timer can be paused, but that verification costs some time.
-    // We do not want measure additional instructions,
-    // so we remember a point in time at start just in case.
-    
-    // If the timer was paused and then unpaused,
-    // we must shift forward a start point by the idle time.
-    if ( m_isRunningAfterUnpause ) {
-        m_startPoint += ( m_unpausePoint - m_pausePoint );
-        m_isRunningAfterUnpause = false;
-    }
+    if ( m_isRunning ) {  // ...we do not want to measure this validation.
+        m_endPoint = m_tempPoint;
 
-    if ( m_isRunning && !m_isPaused ) {
-        m_pausePoint = m_tempPoint;
-        m_isPaused = true;
+        // Set flags.
+        m_isRunning = false;
+        m_isStopped = true;
     }
 }
 
 
-inline void Timer::Unpause() {
-    if ( !m_isPaused ) {
-        return;
+inline unsigned long long Timer::GetTime( TimeUnit timeUnit ) {
+    if ( m_isStopped ) {
+        switch ( timeUnit ) {
+            case nanoseconds:
+                return std::chrono::duration_cast< std::chrono::nanoseconds >
+                       ( m_endPoint - m_startPoint ).count();
+
+            case microseconds:
+                return std::chrono::duration_cast< std::chrono::microseconds >
+                       ( m_endPoint - m_startPoint ).count();
+
+            case milliseconds:
+                return std::chrono::duration_cast< std::chrono::milliseconds >
+                       ( m_endPoint - m_startPoint ).count();
+                
+            case seconds:
+                return std::chrono::duration_cast< std::chrono::seconds >
+                       ( m_endPoint - m_startPoint ).count();
+
+            case minutes:
+                return std::chrono::duration_cast< std::chrono::minutes >
+                       ( m_endPoint - m_startPoint ).count();
+
+            case hours:
+                return std::chrono::duration_cast< std::chrono::hours >
+                       ( m_endPoint - m_startPoint ).count();
+        }
     }
 
-    // Set flags.
-    m_isPaused = false;
-    m_isRunningAfterUnpause = true;
-
-    m_unpausePoint = std::chrono::steady_clock::now();
+    return 0;
 }
 
 
