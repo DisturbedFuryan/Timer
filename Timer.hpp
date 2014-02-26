@@ -24,8 +24,8 @@ public:
 
     /** Gets time in given unit (milliseconds by default).
      *  
-     *  @param  timeUnit  desired unit of time
-     *  @return  measured time
+     *  @param   timeUnit  desired unit of time
+     *  @return            measured time
      */
     unsigned long long GetTime( TimeUnit timeUnit = milliseconds );
 
