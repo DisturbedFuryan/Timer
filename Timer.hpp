@@ -51,9 +51,7 @@ private:
 
 inline void Timer::start() {
     // We can not start timer again.
-    if ( m_isRunning ) {
-        return;
-    }
+    if ( m_isRunning ) return;
 
     // Set flags.
     m_isRunning = true;
