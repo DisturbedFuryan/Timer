@@ -4,7 +4,7 @@
 using namespace std;
 
 
-inline void Pause() {
+inline void pause() {
     cout << "Press ENTER to continue...";
     cin.get();
 }
@@ -14,13 +14,13 @@ inline void Pause() {
 int main() {
     Timer tmr;
 
-    Pause();
-    tmr.Start();
+    pause();
+    tmr.start();
 
-    Pause();
-    tmr.Stop();
+    pause();
+    tmr.stop();
 
-    cout << "Elapsed time: " << ( tmr.GetTime() / 1000.0 ) << " s\n";
+    cout << "Elapsed time: " << ( tmr.getTime() / 1000.0 ) << " s\n";
 
     return 0;
 }

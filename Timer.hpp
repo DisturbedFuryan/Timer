@@ -7,7 +7,7 @@
 //==================================================================================================
 /** Just measures the time.
  *
- *  @author  Marcin Rainka
+ *  @author   Marcin Rainka
  *  @version  1.0
  */
 class Timer {
@@ -17,21 +17,21 @@ public:
     Timer() : m_isRunning( false ), m_isStopped( false ) {}
 
     /** Starts time measuring. */
-    void Start();
+    void start();
 
     /** Stops time measuring. */
-    void Stop();
+    void stop();
 
     /** Gets time in given unit (milliseconds by default).
      *  
-     *  @param   timeUnit  desired unit of time
-     *  @return            measured time
+     *  @param   timeUnit  Desired unit of time.
+     *  @return            Measured time.
      */
-    unsigned long long GetTime( TimeUnit timeUnit = milliseconds );
+    unsigned long long getTime( TimeUnit timeUnit = milliseconds );
 
     /* Getters. */
-    bool IsRunning() const { return m_isRunning; }
-    bool IsStopped() const { return m_isStopped; }
+    bool isRunning() const { return m_isRunning; }
+    bool isStopped() const { return m_isStopped; }
 
 private:
     /** Start point in time. */
@@ -49,7 +49,7 @@ private:
 //==================================================================================================
 
 
-inline void Timer::Start() {
+inline void Timer::start() {
     // We can not start timer again.
     if ( m_isRunning ) {
         return;
@@ -65,7 +65,7 @@ inline void Timer::Start() {
 }
 
 
-inline void Timer::Stop() {
+inline void Timer::stop() {
     // Get a point in time just in case. It is important to do it here, at start, because...
     m_tempPoint = std::chrono::steady_clock::now();
 
@@ -79,7 +79,7 @@ inline void Timer::Stop() {
 }
 
 
-inline unsigned long long Timer::GetTime( TimeUnit timeUnit ) {
+inline unsigned long long Timer::getTime( TimeUnit timeUnit ) {
     if ( m_isStopped ) {
         switch ( timeUnit ) {
             case nanoseconds:
